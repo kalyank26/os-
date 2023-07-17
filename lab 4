@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_TASKS 10
+
+typedef struct {
+    int id;
+    int period;
+    int execution_time;
+} Task;
+
+Task tasks[MAX_TASKS];
+int num_tasks;
+
+void add_task(int id, int period, int execution_time) {
+    if (num_tasks >= MAX_TASKS) {
+        printf("Maximum number of tasks reached.\n");
+        return;
+    }
+
+    tasks[num_tasks].id = id;
+    tasks[num_tasks].period = period;
+    tasks[num_tasks].execution_time = execution_time;
+    num_tasks++;
+}
+
+void rate_monotonic_scheduler() {
+    int i, j, lcm = 1, hyper_period;
+    bool is_schedulable = true;
+
+    // Calculate the least common multiple (LCM) of task periods
+    for (i = 0; i < num_tasks; i++) {
+        lcm = (lcm * tasks[i].period) / gcd(lcm, tasks[i].period);
+    }
+
+    hyper_period = lcm;
+
+    // Check if each task is schedulable
+    for (i = 0; i < num_tasks; i++) {
+        if (tasks[i].period > hyper_period) {
+            printf("Task %d is not schedulable.\n", tasks[i].id);
+            is_schedulable = false;
+            break;
+        }
+    }
+
+    if (!is_schedulable) {
+        return;
+    }
+
+    printf("Task scheduling:\n");
+    printf("Task\tPeriod\tExecution Time\n");
+    for (i = 0; i < num_tasks; i++) {
+        printf("%d\t%d\t%d\n", tasks[i].id, tasks[i].period, tasks[i].execution_time);
+    }
+
+    printf("\nHyperperiod: %d time units\n\n", hyper_period);
+
+    // Schedule the tasks
+    for (i = 0; i < hyper_period; i++) {
+        for (j = 0; j < num_tasks; j++) {
+            if (i % tasks[j].period == 0) {
+                printf("Scheduled task %d at time %d\n", tasks[j].id, i);
+                // Simulate execution of the task
+                for (int k = 0; k < tasks[j].execution_time; k++) {
+                    // Task execution code
+                }
+            }
+        }
+    }
+}
+
+int gcd(int a, int b) {
+    if (b == 0) {
+        return a;
+    } else {
+        return gcd(b, a % b);
+    }
+}
+
+int main() {
+    // Example tasks
+    add_task(1, 10, 2);
+    add_task(2, 5, 1);
+    add_task(3, 20, 3);
+
+    rate_monotonic_scheduler();
+
+    return 0;
+}
